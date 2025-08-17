@@ -1,4 +1,5 @@
 /* src/styles/colors.css */
 :root {
     --bgcolor: #D1D1D1;
+    --textcolor: #000000;   /* ← 텍스트 검정색 추가 */
 }
