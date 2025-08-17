@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import MenuIcon from '../../assets/images/HomeScreen/menu.png';
+import MenuIcon from '../../assets/images/HomeScreen/menu.svg';
 import { useNavigate } from 'react-router-dom';
 
 export default function MenuLayout({ text = '', type = '' }) {
@@ -16,7 +16,7 @@ export default function MenuLayout({ text = '', type = '' }) {
 
     const baseTextStyle = {
         fontFamily: 'Pretendard-SemiBold',
-        fontSize: '14pt',
+        fontSize: '20pt',
         color: 'var(--textcolor)',
         cursor: 'pointer',
         transition: 'color .3s, transform .3s',
@@ -31,6 +31,7 @@ export default function MenuLayout({ text = '', type = '' }) {
             transform: open ? 'rotate(0deg)' : 'rotate(45deg)',
             transition: 'transform .3s',
             zIndex: 10,
+            margin: '20px'
         };
         if (position === 'top-left') {
             st.top = '20px'; st.left = '20px';
@@ -97,14 +98,14 @@ export default function MenuLayout({ text = '', type = '' }) {
                     <>
                         <div style={{
                             position: 'absolute',
-                            top: 'calc(env(safe-area-inset-top) + 20px)',
+                            top: 'calc(env(safe-area-inset-top) + 45px)',
                             left: '50%',
                             transform: 'translateX(-50%)',
                             ...baseTextStyle,
                         }}>{text}</div>
                         <div style={{
                             position: 'absolute',
-                            bottom: 'calc(env(safe-area-inset-bottom) + 20px)',
+                            bottom: 'calc(env(safe-area-inset-bottom) + 45px)',
                             left: '50%',
                             transform: 'translateX(-50%)',
                             ...baseTextStyle,
@@ -116,17 +117,17 @@ export default function MenuLayout({ text = '', type = '' }) {
                 <div style={{
                     position: 'absolute',
                     top: '50%',
-                    left: '20px',
-                    transform: 'translateY(-50%) rotate(270deg)',
-                    transformOrigin: 'left center',
+                    left: '60px',
+                    transform: 'translate(-50%, -50%) rotate(270deg)',
+                    transformOrigin: 'center center',
                     ...baseTextStyle,
                 }}>{text}</div>
                 <div style={{
                     position: 'absolute',
                     top: '50%',
-                    right: '20px',
-                    transform: 'translateY(-50%) rotate(90deg)',
-                    transformOrigin: 'right center',
+                    right: '60px',
+                    transform: 'translate(50%, -50%) rotate(90deg)',
+                    transformOrigin: 'center center',
                     ...baseTextStyle,
                 }}>{text}</div>
             </div>
