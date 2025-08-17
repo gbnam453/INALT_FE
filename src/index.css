@@ -28,11 +28,19 @@ body {
   place-items: center;
   min-width: 320px;
   min-height: 100vh;
+  font-family: 'Pretendard', sans-serif;
+  background-color: var(--bgcolor);
 }
 
 h1 {
   font-size: 3.2em;
   line-height: 1.1;
+}
+
+/* src/index.css */
+html, body, #root {
+  height: 100%;
+  margin: 0;
 }
 
 button {
