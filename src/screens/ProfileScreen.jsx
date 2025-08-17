@@ -1,10 +1,25 @@
-// src/screens/ProfileScreen.js
-import React from 'react';
+import React, { useEffect } from 'react';
+import MenuLayout from '../components/Common/MenuLayout';
+
 export default function ProfileScreen() {
+    useEffect(() => {
+        const orig = document.body.style.overflow;
+        document.body.style.overflow = 'hidden';
+        return () => { document.body.style.overflow = orig };
+    }, []);
+
     return (
-        <div>
-            <h1>Profile</h1>
-            <p>이 페이지에서는 아티스트의 프로필과 경력, 주요 수상 내역을 소개합니다.</p>
+        <div style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            width: '100vw',
+            height: '100vh',
+            backgroundColor: 'var(--bgcolor)'
+        }}>
+            {/* 프로필 콘텐츠 */}
+
+            <MenuLayout text="PROFILE" type="child" />
         </div>
     );
 }

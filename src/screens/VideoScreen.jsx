@@ -1,13 +1,25 @@
-// src/screens/VideoScreen.js
-import React from 'react';
+import React, { useEffect } from 'react';
+import MenuLayout from '../components/Common/MenuLayout';
+
 export default function VideoScreen() {
+    useEffect(() => {
+        const orig = document.body.style.overflow;
+        document.body.style.overflow = 'hidden';
+        return () => { document.body.style.overflow = orig };
+    }, []);
+
     return (
-        <div>
-            <h1>Music Videos</h1>
-            <ul>
-                <li><a href="https://youtu.be/example1" target="_blank" rel="noopener noreferrer">MV: Song Title 1</a></li>
-                <li><a href="https://youtu.be/example2" target="_blank" rel="noopener noreferrer">MV: Song Title 2</a></li>
-            </ul>
+        <div style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            width: '100vw',
+            height: '100vh',
+            backgroundColor: 'var(--bgcolor)'
+        }}>
+            {/* 비디오 콘텐츠 */}
+
+            <MenuLayout text="MUSIC VIDEO" type="child" />
         </div>
     );
 }

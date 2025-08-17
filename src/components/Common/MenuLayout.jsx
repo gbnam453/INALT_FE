@@ -2,12 +2,11 @@ import React, { useState, useEffect } from 'react';
 import MenuIcon from '../../assets/images/HomeScreen/menu.png';
 import { useNavigate } from 'react-router-dom';
 
-export default function MenuLayout({ text = '' }) {
+export default function MenuLayout({ text = '', type = '' }) {
     const [open, setOpen] = useState(false);
     const [isVertical, setIsVertical] = useState(true);
     const navigate = useNavigate();
 
-    // 화면 비율에 따라 메뉴 방향
     useEffect(() => {
         const updateDir = () => setIsVertical(window.innerWidth < window.innerHeight);
         updateDir();
@@ -23,7 +22,6 @@ export default function MenuLayout({ text = '' }) {
         transition: 'color .3s, transform .3s',
     };
 
-    // 메뉴 버튼 모서리 위치 렌더링
     const renderCornerButton = (position) => {
         const st = {
             position: 'absolute',
@@ -48,7 +46,7 @@ export default function MenuLayout({ text = '' }) {
 
     return (
         <>
-            {/* 투명~blur 백그라운드 레이어 */}
+            {/* blur 레이어 */}
             <div style={{
                 position: 'fixed',
                 inset: 0,
@@ -74,7 +72,7 @@ export default function MenuLayout({ text = '' }) {
                             { label: 'HOME', go: () => navigate('/') },
                             { label: 'PROFILE', go: () => navigate('/profile') },
                             { label: 'DISCOGRAPHY', go: () => navigate('/discography') },
-                            { label: 'MUSIC VIDEO', go: () => navigate('/video') },
+                            { label: 'MUSIC VIDEO', go: () => navigate('/videos') },
                             { label: 'SIGN UP', go: () => window.open('https://laylo.com/inalt_', '_blank') }
                         ].map(i => (
                             <div
@@ -82,12 +80,10 @@ export default function MenuLayout({ text = '' }) {
                                 style={baseTextStyle}
                                 onClick={() => { i.go(); setOpen(false); }}
                                 onMouseEnter={e => {
-                                    e.currentTarget.style.color = '#000';
-                                    e.currentTarget.style.transform = 'scale(1.15)';
+                                    e.currentTarget.style.color = '#000'; e.currentTarget.style.transform = 'scale(1.15)';
                                 }}
                                 onMouseLeave={e => {
-                                    e.currentTarget.style.color = 'var(--textcolor)';
-                                    e.currentTarget.style.transform = 'scale(1)';
+                                    e.currentTarget.style.color = 'var(--textcolor)'; e.currentTarget.style.transform = 'scale(1)';
                                 }}
                             >
                                 {i.label}
@@ -96,14 +92,27 @@ export default function MenuLayout({ text = '' }) {
                     </div>
                 )}
 
-                {/* 상하좌우 텍스트 */}
-                <div style={{
-                    position: 'absolute',
-                    top: 'calc(env(safe-area-inset-top) + 20px)',
-                    left: '50%',
-                    transform: 'translateX(-50%)',
-                    ...baseTextStyle,
-                }}>{text}</div>
+                {/* type이 child 가 아니면 상단/하단 텍스트도 보여줌 */}
+                {type !== 'child' && (
+                    <>
+                        <div style={{
+                            position: 'absolute',
+                            top: 'calc(env(safe-area-inset-top) + 20px)',
+                            left: '50%',
+                            transform: 'translateX(-50%)',
+                            ...baseTextStyle,
+                        }}>{text}</div>
+                        <div style={{
+                            position: 'absolute',
+                            bottom: 'calc(env(safe-area-inset-bottom) + 20px)',
+                            left: '50%',
+                            transform: 'translateX(-50%)',
+                            ...baseTextStyle,
+                        }}>{text}</div>
+                    </>
+                )}
+
+                {/* 좌/우 텍스트는 항상 표시 */}
                 <div style={{
                     position: 'absolute',
                     top: '50%',
@@ -120,16 +129,9 @@ export default function MenuLayout({ text = '' }) {
                     transformOrigin: 'right center',
                     ...baseTextStyle,
                 }}>{text}</div>
-                <div style={{
-                    position: 'absolute',
-                    bottom: 'calc(env(safe-area-inset-bottom) + 20px)',
-                    left: '50%',
-                    transform: 'translateX(-50%)',
-                    ...baseTextStyle,
-                }}>{text}</div>
             </div>
 
-            {/* 모서리 버튼들은 blur 레이어 밖에 항상 떠있도록 */}
+            {/* 모서리 메뉴버튼 */}
             {['top-left','top-right','bottom-left','bottom-right'].map(pos => renderCornerButton(pos))}
         </>
     );
