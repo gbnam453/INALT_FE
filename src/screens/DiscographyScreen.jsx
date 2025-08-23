@@ -15,10 +15,26 @@ export default function DiscographyScreen() {
             left: 0,
             width: '100vw',
             height: '100vh',
-            backgroundColor: 'var(--bgcolor)'
+            backgroundColor: 'var(--bgcolor)',
+            display: 'flex',
+            justifyContent: 'center',
         }}>
-            {/* 콘텐츠 영역 */}
+            {/* 상단 제목 */}
+            <div
+                style={{
+                    fontFamily: 'Pretendard-Bold',
+                    fontSize: '30pt',
+                    marginTop: '40px',
+                    color: 'var(--textcolor)',
+                    textAlign: 'center',
+                    position: 'absolute',
+                    top: 0,
+                }}
+            >
+                DISCOGRAPHY
+            </div>
 
+            {/* 메뉴 */}
             <MenuLayout text="DISCOGRAPHY" type="child" />
         </div>
     );

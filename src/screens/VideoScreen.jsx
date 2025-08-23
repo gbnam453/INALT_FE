@@ -15,10 +15,26 @@ export default function VideoScreen() {
             left: 0,
             width: '100vw',
             height: '100vh',
-            backgroundColor: 'var(--bgcolor)'
+            backgroundColor: 'var(--bgcolor)',
+            display: 'flex',
+            justifyContent: 'center',
         }}>
-            {/* 비디오 콘텐츠 */}
+            {/* 상단 제목 */}
+            <div
+                style={{
+                    fontFamily: 'Pretendard-Bold',
+                    fontSize: '30pt',
+                    marginTop: '40px',
+                    color: 'var(--textcolor)',
+                    textAlign: 'center',
+                    position: 'absolute',
+                    top: 0,
+                }}
+            >
+                MUSIC VIDEO
+            </div>
 
+            {/* 메뉴 */}
             <MenuLayout text="MUSIC VIDEO" type="child" />
         </div>
     );

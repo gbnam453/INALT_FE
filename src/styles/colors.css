@@ -1,5 +1,5 @@
-/* src/styles/colors.css */
 :root {
     --bgcolor: #D1D1D1;
-    --textcolor: #000000;   /* ← 텍스트 검정색 추가 */
+    --textcolor: #000000;      /* 제목/메뉴 등 기본 텍스트 색상 */
+    --bodytextcolor: #747474;  /* 본문 전용 텍스트 색상 */
 }
