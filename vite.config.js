@@ -6,6 +6,9 @@ export default defineConfig({
   plugins: [react()],
   server: {
     port: 22031,   // 원하는 포트
-    host: true    // 외부에서도 접근 가능하게
+    host: true,    // 외부에서도 접근 가능하게
+    allowedHosts: [
+      'gbnam453.iptime.org'             // ✅ 여기에 추가
+    ]
   }
 })
