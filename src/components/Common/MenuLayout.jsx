@@ -47,93 +47,100 @@ export default function MenuLayout({ text = '', type = '' }) {
 
     return (
         <>
-            {/* blur 레이어 */}
+            {/* ================= blur layer (열렸을 때만) ================ */}
+            {open && (
+                <div
+                    style={{
+                        position: 'fixed',
+                        inset: 0,
+                        zIndex: 5,
+                        backdropFilter: 'blur(12px)',
+                        backgroundColor: 'rgba(255,255,255,0.2)',
+                        transition: 'backdrop-filter .35s, background-color .35s',
+                    }}
+                    onClick={() => setOpen(false)}
+                />
+            )}
+
+            {/* ================= 메뉴리스트 (열렸을 때만) ================ */}
+            {open && (
+                <div style={{
+                    position: 'fixed',
+                    zIndex: 8,
+                    top: '50%',
+                    left: '50%',
+                    transform: 'translate(-50%, -50%)',
+                    display: 'flex',
+                    flexDirection: isVertical ? 'column' : 'row',
+                    gap: isVertical ? '32px' : '64px',
+                    alignItems: 'center',
+                }}>
+                    {[
+                        { label: 'HOME', go: () => navigate('/') },
+                        { label: 'PROFILE', go: () => navigate('/profile') },
+                        { label: 'DISCOGRAPHY', go: () => navigate('/discography') },
+                        { label: 'MUSIC VIDEO', go: () => navigate('/videos') },
+                        { label: 'SIGN UP', go: () => window.open('https://laylo.com/inalt_', '_blank') }
+                    ].map(i => (
+                        <div
+                            key={i.label}
+                            style={baseTextStyle}
+                            onClick={() => { i.go(); setOpen(false); }}
+                            onMouseEnter={e => {
+                                e.currentTarget.style.color = '#000'; e.currentTarget.style.transform = 'scale(1.15)';
+                            }}
+                            onMouseLeave={e => {
+                                e.currentTarget.style.color = 'var(--textcolor)'; e.currentTarget.style.transform = 'scale(1)';
+                            }}
+                        >
+                            {i.label}
+                        </div>
+                    ))}
+                </div>
+            )}
+
+            {/* ================= 평상시 텍스트 & 버튼 =================== */}
+
+            {/* type이 child가 아니면 상단/하단 텍스트도 표시 */}
+            {type !== 'child' && (
+                <>
+                    <div style={{
+                        position: 'fixed',
+                        top: 'calc(env(safe-area-inset-top) + 45px)',
+                        left: '50%',
+                        transform: 'translateX(-50%)',
+                        ...baseTextStyle,
+                    }}>{text}</div>
+                    <div style={{
+                        position: 'fixed',
+                        bottom: 'calc(env(safe-area-inset-bottom) + 45px)',
+                        left: '50%',
+                        transform: 'translateX(-50%)',
+                        ...baseTextStyle,
+                    }}>{text}</div>
+                </>
+            )}
+
+            {/* 좌/우 텍스트는 항상 표시 */}
             <div style={{
                 position: 'fixed',
-                inset: 0,
-                zIndex: 5,
-                pointerEvents: open ? 'auto' : 'none',
-                backdropFilter: open ? 'blur(12px)' : 'none',
-                backgroundColor: open ? 'rgba(255,255,255,0.2)' : 'transparent',
-                transition: 'backdrop-filter .35s, background-color .35s',
-            }}>
-                {open && (
-                    <div style={{
-                        position: 'absolute',
-                        top: '50%',
-                        left: '50%',
-                        transform: 'translate(-50%, -50%)',
-                        display: 'flex',
-                        flexDirection: isVertical ? 'column' : 'row',
-                        gap: isVertical ? '32px' : '64px',
-                        alignItems: 'center',
-                        zIndex: 8,
-                    }}>
-                        {[
-                            { label: 'HOME', go: () => navigate('/') },
-                            { label: 'PROFILE', go: () => navigate('/profile') },
-                            { label: 'DISCOGRAPHY', go: () => navigate('/discography') },
-                            { label: 'MUSIC VIDEO', go: () => navigate('/videos') },
-                            { label: 'SIGN UP', go: () => window.open('https://laylo.com/inalt_', '_blank') }
-                        ].map(i => (
-                            <div
-                                key={i.label}
-                                style={baseTextStyle}
-                                onClick={() => { i.go(); setOpen(false); }}
-                                onMouseEnter={e => {
-                                    e.currentTarget.style.color = '#000'; e.currentTarget.style.transform = 'scale(1.15)';
-                                }}
-                                onMouseLeave={e => {
-                                    e.currentTarget.style.color = 'var(--textcolor)'; e.currentTarget.style.transform = 'scale(1)';
-                                }}
-                            >
-                                {i.label}
-                            </div>
-                        ))}
-                    </div>
-                )}
-
-                {/* type이 child 가 아니면 상단/하단 텍스트도 보여줌 */}
-                {type !== 'child' && (
-                    <>
-                        <div style={{
-                            position: 'absolute',
-                            top: 'calc(env(safe-area-inset-top) + 45px)',
-                            left: '50%',
-                            transform: 'translateX(-50%)',
-                            ...baseTextStyle,
-                        }}>{text}</div>
-                        <div style={{
-                            position: 'absolute',
-                            bottom: 'calc(env(safe-area-inset-bottom) + 45px)',
-                            left: '50%',
-                            transform: 'translateX(-50%)',
-                            ...baseTextStyle,
-                        }}>{text}</div>
-                    </>
-                )}
-
-                {/* 좌/우 텍스트는 항상 표시 */}
-                <div style={{
-                    position: 'absolute',
-                    top: '50%',
-                    left: '60px',
-                    transform: 'translate(-50%, -50%) rotate(270deg)',
-                    transformOrigin: 'center center',
-                    ...baseTextStyle,
-                }}>{text}</div>
-                <div style={{
-                    position: 'absolute',
-                    top: '50%',
-                    right: '60px',
-                    transform: 'translate(50%, -50%) rotate(90deg)',
-                    transformOrigin: 'center center',
-                    ...baseTextStyle,
-                }}>{text}</div>
-            </div>
+                top: '50%',
+                left: '60px',
+                transform: 'translate(-50%, -50%) rotate(270deg)',
+                transformOrigin: 'center center',
+                ...baseTextStyle,
+            }}>{text}</div>
+            <div style={{
+                position: 'fixed',
+                top: '50%',
+                right: '60px',
+                transform: 'translate(50%, -50%) rotate(90deg)',
+                transformOrigin: 'center center',
+                ...baseTextStyle,
+            }}>{text}</div>
 
             {/* 모서리 메뉴버튼 */}
-            {['top-left','top-right','bottom-left','bottom-right'].map(pos => renderCornerButton(pos))}
+            {['top-left', 'top-right', 'bottom-left', 'bottom-right'].map(pos => renderCornerButton(pos))}
         </>
     );
 }

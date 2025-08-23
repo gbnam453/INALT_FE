@@ -4,7 +4,7 @@
   "version": "0.0.1",
   "type": "module",
   "scripts": {
-    "dev": "vite --host",
+    "dev": "vite --host --port 22031",
     "build:dev": "vite build --mode development --watch --outDir dev-dist",
     "build": "vite build",
     "lint": "eslint .",
