@@ -5,142 +5,201 @@ import { useNavigate } from 'react-router-dom';
 export default function MenuLayout({ text = '', type = '' }) {
     const [open, setOpen] = useState(false);
     const [isVertical, setIsVertical] = useState(true);
+    const [isNarrow, setIsNarrow] = useState(false); // 🔥 화면 폭 체크
     const navigate = useNavigate();
 
     useEffect(() => {
         const updateDir = () => setIsVertical(window.innerWidth < window.innerHeight);
+        const updateNarrow = () => setIsNarrow(window.innerWidth < 600); // 600px 기준
         updateDir();
+        updateNarrow();
         window.addEventListener('resize', updateDir);
-        return () => window.removeEventListener('resize', updateDir);
+        window.addEventListener('resize', updateNarrow);
+        return () => {
+            window.removeEventListener('resize', updateDir);
+            window.removeEventListener('resize', updateNarrow);
+        };
     }, []);
 
     const baseTextStyle = {
         fontFamily: 'Pretendard-SemiBold',
-        fontSize: '20pt',
+        fontSize: 'clamp(15px, 3.5vw, 30px)',
         color: 'var(--textcolor)',
         cursor: 'pointer',
         transition: 'color .3s, transform .3s',
+        whiteSpace: 'nowrap',
+        userSelect: 'none',
     };
+
+    const cornerSize = 'clamp(24px, 6vw, 48px)';
+    const sideOffset = 'clamp(40px, 6vw, 60px)';
 
     const renderCornerButton = (position) => {
         const st = {
-            position: 'absolute',
-            width: '40px',
-            height: '40px',
+            position: 'fixed',
+            width: cornerSize,
+            height: cornerSize,
             cursor: 'pointer',
             transform: open ? 'rotate(0deg)' : 'rotate(45deg)',
             transition: 'transform .3s',
-            zIndex: 10,
-            margin: '20px'
+            zIndex: 1002,
+            WebkitTapHighlightColor: 'transparent',
         };
+
+        // ✅ 모서리에서 떨어질 거리
+        const offset = 'clamp(20px, 5vw, 60px)';
+
         if (position === 'top-left') {
-            st.top = '20px'; st.left = '20px';
+            st.top = offset;
+            st.left = offset;
         } else if (position === 'top-right') {
-            st.top = '20px'; st.right = '20px';
+            st.top = offset;
+            st.right = offset;
         } else if (position === 'bottom-left') {
-            st.bottom = '20px'; st.left = '20px';
+            st.bottom = offset;
+            st.left = offset;
         } else if (position === 'bottom-right') {
-            st.bottom = '20px'; st.right = '20px';
+            st.bottom = offset;
+            st.right = offset;
         }
-        return <img key={position} src={MenuIcon} onClick={() => setOpen(!open)} style={st} alt="menu" />
+
+        return (
+            <img
+                key={position}
+                src={MenuIcon}
+                onClick={() => setOpen((v) => !v)}
+                style={st}
+                alt="menu"
+            />
+        );
     };
 
     return (
         <>
-            {/* ================= blur layer (열렸을 때만) ================ */}
-            {open && (
-                <div
-                    style={{
-                        position: 'fixed',
-                        inset: 0,
-                        zIndex: 5,
-                        backdropFilter: 'blur(12px)',
-                        backgroundColor: 'rgba(255,255,255,0.2)',
-                        transition: 'backdrop-filter .35s, background-color .35s',
-                    }}
-                    onClick={() => setOpen(false)}
-                />
-            )}
-
-            {/* ================= 메뉴리스트 (열렸을 때만) ================ */}
-            {open && (
-                <div style={{
+            {/* blur 레이어 */}
+            <div
+                style={{
                     position: 'fixed',
-                    zIndex: 8,
-                    top: '50%',
-                    left: '50%',
-                    transform: 'translate(-50%, -50%)',
-                    display: 'flex',
-                    flexDirection: isVertical ? 'column' : 'row',
-                    gap: isVertical ? '32px' : '64px',
-                    alignItems: 'center',
-                }}>
-                    {[
-                        { label: 'HOME', go: () => navigate('/') },
-                        { label: 'PROFILE', go: () => navigate('/profile') },
-                        { label: 'DISCOGRAPHY', go: () => navigate('/discography') },
-                        { label: 'MUSIC VIDEO', go: () => navigate('/videos') },
-                        { label: 'SIGN UP', go: () => window.open('https://laylo.com/inalt_', '_blank') }
-                    ].map(i => (
+                    inset: 0,
+                    zIndex: 1000,
+                    pointerEvents: open ? 'auto' : 'none',
+                    backdropFilter: open ? 'blur(12px)' : 'none',
+                    WebkitBackdropFilter: open ? 'blur(12px)' : 'none',
+                    backgroundColor: open ? 'rgba(255,255,255,0.08)' : 'transparent',
+                    transition: 'backdrop-filter .35s, background-color .35s',
+                }}
+            >
+                {open && (
+                    <div
+                        style={{
+                            position: 'absolute',
+                            top: '50%',
+                            left: '50%',
+                            transform: 'translate(-50%, -50%)',
+                            display: 'flex',
+                            flexDirection: isVertical ? 'column' : 'row',
+                            gap: isVertical ? '28px' : '64px',
+                            alignItems: 'center',
+                            zIndex: 1001,
+                        }}
+                    >
+                        {[
+                            { label: 'HOME', go: () => navigate('/') },
+                            { label: 'PROFILE', go: () => navigate('/profile') },
+                            { label: 'DISCOGRAPHY', go: () => navigate('/discography') },
+                            { label: 'MUSIC VIDEO', go: () => navigate('/videos') },
+                            { label: 'SIGN UP', go: () => window.open('https://laylo.com/inalt_', '_blank') },
+                        ].map((i) => (
+                            <div
+                                key={i.label}
+                                style={baseTextStyle}
+                                onClick={() => { i.go(); setOpen(false); }}
+                                onMouseEnter={(e) => {
+                                    e.currentTarget.style.color = '#000';
+                                    e.currentTarget.style.transform = 'scale(1.12)';
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.currentTarget.style.color = 'var(--textcolor)';
+                                    e.currentTarget.style.transform = 'scale(1)';
+                                }}
+                            >
+                                {i.label}
+                            </div>
+                        ))}
+                    </div>
+                )}
+
+                {/* type !== 'child' 일 때만 상/하 텍스트 */}
+                {type !== 'child' && (
+                    <>
                         <div
-                            key={i.label}
-                            style={baseTextStyle}
-                            onClick={() => { i.go(); setOpen(false); }}
-                            onMouseEnter={e => {
-                                e.currentTarget.style.color = '#000'; e.currentTarget.style.transform = 'scale(1.15)';
-                            }}
-                            onMouseLeave={e => {
-                                e.currentTarget.style.color = 'var(--textcolor)'; e.currentTarget.style.transform = 'scale(1)';
+                            style={{
+                                position: 'fixed',
+                                top: 'calc(env(safe-area-inset-top) + 45px)',
+                                left: '50%',
+                                transform: 'translateX(-50%)',
+                                ...baseTextStyle,
+                                pointerEvents: 'none',
+                                zIndex: 1000,
                             }}
                         >
-                            {i.label}
+                            {text}
                         </div>
-                    ))}
-                </div>
-            )}
+                        <div
+                            style={{
+                                position: 'fixed',
+                                bottom: 'calc(env(safe-area-inset-bottom) + 45px)',
+                                left: '50%',
+                                transform: 'translateX(-50%)',
+                                ...baseTextStyle,
+                                pointerEvents: 'none',
+                                zIndex: 1000,
+                            }}
+                        >
+                            {text}
+                        </div>
+                    </>
+                )}
 
-            {/* ================= 평상시 텍스트 & 버튼 =================== */}
-
-            {/* type이 child가 아니면 상단/하단 텍스트도 표시 */}
-            {type !== 'child' && (
-                <>
-                    <div style={{
-                        position: 'fixed',
-                        top: 'calc(env(safe-area-inset-top) + 45px)',
-                        left: '50%',
-                        transform: 'translateX(-50%)',
-                        ...baseTextStyle,
-                    }}>{text}</div>
-                    <div style={{
-                        position: 'fixed',
-                        bottom: 'calc(env(safe-area-inset-bottom) + 45px)',
-                        left: '50%',
-                        transform: 'translateX(-50%)',
-                        ...baseTextStyle,
-                    }}>{text}</div>
-                </>
-            )}
-
-            {/* 좌/우 텍스트는 항상 표시 */}
-            <div style={{
-                position: 'fixed',
-                top: '50%',
-                left: '60px',
-                transform: 'translate(-50%, -50%) rotate(270deg)',
-                transformOrigin: 'center center',
-                ...baseTextStyle,
-            }}>{text}</div>
-            <div style={{
-                position: 'fixed',
-                top: '50%',
-                right: '60px',
-                transform: 'translate(50%, -50%) rotate(90deg)',
-                transformOrigin: 'center center',
-                ...baseTextStyle,
-            }}>{text}</div>
+                {/* 좌/우 텍스트 (좁은 화면에서는 숨김) */}
+                {!isNarrow && (
+                    <>
+                        <div
+                            style={{
+                                position: 'fixed',
+                                top: '50%',
+                                left: sideOffset,
+                                transform: 'translate(-50%, -50%) rotate(270deg)',
+                                transformOrigin: 'center center',
+                                ...baseTextStyle,
+                                pointerEvents: 'none',
+                                zIndex: 1000,
+                            }}
+                        >
+                            {text}
+                        </div>
+                        <div
+                            style={{
+                                position: 'fixed',
+                                top: '50%',
+                                right: sideOffset,
+                                transform: 'translate(50%, -50%) rotate(90deg)',
+                                transformOrigin: 'center center',
+                                ...baseTextStyle,
+                                pointerEvents: 'none',
+                                zIndex: 1000,
+                            }}
+                        >
+                            {text}
+                        </div>
+                    </>
+                )}
+            </div>
 
             {/* 모서리 메뉴버튼 */}
-            {['top-left', 'top-right', 'bottom-left', 'bottom-right'].map(pos => renderCornerButton(pos))}
+            {['top-left', 'top-right', 'bottom-left', 'bottom-right'].map((pos) =>
+                renderCornerButton(pos)
+            )}
         </>
     );
 }
