@@ -26,6 +26,10 @@ export default function DiscographyScreen() {
                 height: '100vh',
                 backgroundColor: 'var(--bgcolor)',
                 overflowY: 'auto',
+                boxSizing: 'border-box',
+                // ✅ 좌우 safe padding 제거 → 원래 위치로 복구
+                // paddingLeft: 'var(--menu-safe-left)',
+                // paddingRight: 'var(--menu-safe-right)',
             }}
         >
             {/* 상단 제목 */}
@@ -67,8 +71,7 @@ export default function DiscographyScreen() {
             <style>
                 {`
           .album-grid { 
-            grid-template-columns: repeat(3, 1fr);   /* 셀 폭 균등 */
-            place-items: stretch center;             /* 셀 폭 맞추고 가운데 정렬 */
+            grid-template-columns: repeat(3, 1fr);
           }
           @media (max-width: 900px) {
             .album-grid {

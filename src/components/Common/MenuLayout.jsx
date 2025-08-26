@@ -54,6 +54,10 @@ export default function MenuLayout({ text = '', type = '' }) {
     const topOffset = `calc(env(safe-area-inset-top) + ${edgeOffset})`;
     const bottomOffset = `calc(env(safe-area-inset-bottom) + ${edgeOffset})`;
 
+    // 텍스트 자체 블러(메뉴 열릴 때)
+    const textSelfBlur = open ? 'blur(6px)' : 'none';
+    const textBlurTransition = 'filter .28s ease';
+
     const renderCornerButton = (position) => {
         const st = {
             position: 'fixed',
@@ -145,6 +149,9 @@ export default function MenuLayout({ text = '', type = '' }) {
                             ...baseTextStyle,
                             pointerEvents: 'none',
                             zIndex: 1000,
+                            filter: textSelfBlur,
+                            transition: textBlurTransition,
+                            willChange: 'filter',
                         }}
                     >
                         {text}
@@ -158,6 +165,9 @@ export default function MenuLayout({ text = '', type = '' }) {
                             ...baseTextStyle,
                             pointerEvents: 'none',
                             zIndex: 1000,
+                            filter: textSelfBlur,
+                            transition: textBlurTransition,
+                            willChange: 'filter',
                         }}
                     >
                         {text}
@@ -177,6 +187,9 @@ export default function MenuLayout({ text = '', type = '' }) {
                             transform: 'translateY(-50%)',
                             pointerEvents: 'none',
                             zIndex: 1000,
+                            filter: textSelfBlur,
+                            transition: textBlurTransition,
+                            willChange: 'filter',
                         }}
                     >
                         <div
@@ -202,8 +215,9 @@ export default function MenuLayout({ text = '', type = '' }) {
                             zIndex: 1000,
                             writingMode: 'vertical-rl',     // ← 회전 대신 세로 글줄
                             textOrientation: 'mixed',
-                            // 필요 시 아래 줄을 켜면 글자 진행 방향이 rotate(90deg) 느낌과 동일하게 뒤집힙니다.
-                            // transform: 'translateY(-50%) scaleY(-1)',
+                            filter: textSelfBlur,
+                            transition: textBlurTransition,
+                            willChange: 'filter',
                         }}
                     >
                         <span style={baseTextStyle}>{text}</span>
