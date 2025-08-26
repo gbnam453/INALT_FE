@@ -1,17 +1,18 @@
-// src/screens/VideoScreen.jsx
 import React, { useEffect, useState, useMemo } from 'react';
 import MenuLayout from '../components/Common/MenuLayout';
 import Video from '../components/VideoScreen/Video';
 
 export default function VideoScreen() {
-    const [isNarrow, setIsNarrow] = useState(false);
+    const [isNarrow, setIsNarrow] = useState(false); // 900px 미만을 모바일/좁은 화면 기준
 
+    // 바디 스크롤 잠금
     useEffect(() => {
         const prev = document.body.style.overflow;
-        document.body.style.overflow = 'hidden'; // 바디 스크롤 잠금
+        document.body.style.overflow = 'hidden';
         return () => { document.body.style.overflow = prev; };
     }, []);
 
+    // 반응형 분기
     useEffect(() => {
         const onResize = () => setIsNarrow(window.innerWidth < 900);
         onResize();
@@ -19,8 +20,21 @@ export default function VideoScreen() {
         return () => window.removeEventListener('resize', onResize);
     }, []);
 
-    // 디스플레이 간격(컴포넌트 사이 간격 크게)
+    // 섹션 간격(디스코 스타일과 동일)
     const SECTION_GAP = useMemo(() => (isNarrow ? 80 : 100), [isNarrow]);
+
+    // 디스코 스타일에서 쓰는 기준값들
+    const cornerSize = 'clamp(24px, 6vw, 48px)';   // 모서리 버튼 크기
+    const edgeOffset = 'clamp(24px, 5vw, 70px)';   // 상/하 여백 기준
+    const barH       = 'clamp(56px, 12vw, 72px)';  // 모바일 child 상단바 높이
+
+    // 제목 baseline: 상단 버튼과 같은 가로선(디스코와 동일 계산식)
+    const topBaseline = isNarrow
+        ? `calc(env(safe-area-inset-top) + ( ${barH} - ${cornerSize} ) / 2)`
+        : `calc(env(safe-area-inset-top) + ${edgeOffset} - ${cornerSize} + 10px)`;
+
+    // 제목 폰트(디스코와 동일)
+    const TITLE_FONT = 'clamp(34px, 6.5vw, 46px)';
 
     // 데이터는 경로 문자열로 관리 (import 없이)
     const videos = [
@@ -66,40 +80,38 @@ export default function VideoScreen() {
                 width: '100vw',
                 height: '100vh',
                 backgroundColor: 'var(--bgcolor)',
-                // 화면 전체를 스크롤 컨테이너로 만들어 제목도 함께 움직이게
-                overflowY: 'auto',
+                overflowY: 'auto',                 // ✅ 제목 포함 전체 스크롤
                 display: 'flex',
                 justifyContent: 'center',
             }}
         >
             <div
                 style={{
-                    // 좌우 여백 & MenuLayout 상/하단 텍스트와 겹치지 않도록 패딩 확보
-                    padding: '80px 20px 120px',
-                    boxSizing: 'border-box',
                     width: '100%',
                     maxWidth: '1200px',
+                    boxSizing: 'border-box',
+                    padding: '0 20px 120px',        // ✅ 상단은 topBaseline으로, 하단 넉넉히
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
                     gap: `${SECTION_GAP}px`,
                 }}
             >
-                {/* 상단 제목 (스크롤과 함께 움직임) */}
+                {/* 제목 — 디스코와 동일한 위치/스타일 */}
                 <div
                     style={{
+                        marginTop: topBaseline,                 // ✅ 상단 버튼 가로선과 정렬
                         fontFamily: 'Pretendard-Bold',
-                        fontSize: 'clamp(26px, 5vw, 36px)',
+                        fontSize: TITLE_FONT,
                         color: 'var(--textcolor)',
                         textAlign: 'center',
-                        marginTop: '10px',
-                        marginBottom: `${Math.max(SECTION_GAP - 40, 40)}px`,
+                        marginBottom: `${Math.max(SECTION_GAP, 60)}px`,
                     }}
                 >
                     MUSIC VIDEO
                 </div>
 
-                {/* 비디오 아이템들 */}
+                {/* 비디오 리스트 */}
                 {videos.map((v, idx) => (
                     <Video
                         key={`${v.title}-${idx}`}
@@ -107,7 +119,7 @@ export default function VideoScreen() {
                         title={v.title}
                         content={v.content}
                         date={v.date}
-                        type={v.type} // 'left' | 'right'
+                        type={v.type}
                     />
                 ))}
             </div>

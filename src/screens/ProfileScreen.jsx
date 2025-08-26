@@ -1,43 +1,75 @@
-// src/screens/ProfileScreen.jsx
-import React from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import MenuLayout from '../components/Common/MenuLayout';
 import ProfileImg from '../assets/images/Common/Profile.png';
 
 export default function ProfileScreen() {
+    const [isNarrow, setIsNarrow] = useState(false); // 900px 미만을 모바일/좁은 화면 기준
+
+    // 바디 스크롤 잠금
+    useEffect(() => {
+        const prev = document.body.style.overflow;
+        document.body.style.overflow = 'hidden';
+        return () => { document.body.style.overflow = prev; };
+    }, []);
+
+    // 반응형 분기
+    useEffect(() => {
+        const onResize = () => setIsNarrow(window.innerWidth < 900);
+        onResize();
+        window.addEventListener('resize', onResize);
+        return () => window.removeEventListener('resize', onResize);
+    }, []);
+
+    // 섹션 간격(디스코 스타일과 동일)
+    const SECTION_GAP = useMemo(() => (isNarrow ? 80 : 100), [isNarrow]);
+
+    // 디스코 스타일에서 쓰는 기준값들
+    const cornerSize = 'clamp(24px, 6vw, 48px)';   // 모서리 버튼 크기
+    const edgeOffset = 'clamp(24px, 5vw, 70px)';   // 상/하 여백 기준
+    const barH       = 'clamp(56px, 12vw, 72px)';  // 모바일 child 상단바 높이
+
+    // 제목 baseline: 상단 버튼과 같은 가로선(디스코와 동일 계산식)
+    const topBaseline = isNarrow
+        ? `calc(env(safe-area-inset-top) + ( ${barH} - ${cornerSize} ) / 2)`
+        : `calc(env(safe-area-inset-top) + ${edgeOffset} - ${cornerSize} + 10px)`;
+
+    // 제목 폰트(디스코와 동일)
+    const TITLE_FONT = 'clamp(34px, 6.5vw, 46px)';
+
     return (
         <div
             style={{
-                position: 'relative',         // 메뉴와 스크롤 영역의 기준 컨테이너
+                position: 'fixed',
                 inset: 0,
                 width: '100vw',
                 height: '100vh',
                 backgroundColor: 'var(--bgcolor)',
-                overflow: 'hidden',           // 화면 밖으로 넘치지 않도록만 처리
+                overflowY: 'auto',                 // ✅ 제목 포함 전체 스크롤
+                display: 'flex',
+                justifyContent: 'center',
             }}
         >
-            {/* 가운데 스크롤 영역 (MenuLayout과 분리, 항상 아래 zIndex) */}
             <div
                 style={{
-                    position: 'relative',
-                    zIndex: 1,                  // ✅ 콘텐츠는 아래
-                    height: '100%',
-                    overflowY: 'auto',
+                    width: '100%',
+                    maxWidth: '1200px',
+                    boxSizing: 'border-box',
+                    padding: '0 20px 120px',        // ✅ 상단은 topBaseline으로, 하단 넉넉히
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
-                    boxSizing: 'border-box',
-                    padding: '30px 20px 40px',  // 상단 30, 좌우 20, 하단 40
+                    gap: `${SECTION_GAP}px`,
                 }}
             >
-                {/* 상단 제목 */}
+                {/* 제목 — 디스코와 동일한 위치/스타일 */}
                 <div
                     style={{
+                        marginTop: topBaseline,                 // ✅ 상단 버튼 가로선과 정렬
                         fontFamily: 'Pretendard-Bold',
-                        fontSize: 'clamp(22px, 4vw, 30px)',
-                        marginTop: '40px',
-                        marginBottom: '40px',
+                        fontSize: TITLE_FONT,
                         color: 'var(--textcolor)',
                         textAlign: 'center',
+                        marginBottom: `${Math.max(SECTION_GAP, 60)}px`,
                     }}
                 >
                     PROFILE
@@ -51,12 +83,12 @@ export default function ProfileScreen() {
                         width: 'min(250px, 70vw)',
                         height: 'auto',
                         objectFit: 'cover',
-                        marginBottom: '40px',
                         display: 'block',
+                        marginBottom: '40px',
                     }}
                 />
 
-                {/* 본문 멘트 */}
+                {/* 본문 */}
                 <div
                     style={{
                         fontFamily: 'Pretendard-Regular',
@@ -78,11 +110,8 @@ Although they have not officially debuted yet, the artist continues to evolve an
                 </div>
             </div>
 
-            {/* MenuLayout는 항상 최상단 레이어 */}
-            <div style={{ position: 'fixed', inset: 0, zIndex: 5, pointerEvents: 'none' }}>
-                {/* MenuLayout 내부에서 열린 상태(open)일 때만 pointerEvents를 auto로 바꾸도록 이미 구현되어 있음 */}
-                <MenuLayout text="PROFILE" type="child" />
-            </div>
+            {/* 공용 메뉴 (오버레이) */}
+            <MenuLayout text="PROFILE" type="child" />
         </div>
     );
 }
