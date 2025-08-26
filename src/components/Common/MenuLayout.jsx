@@ -1,16 +1,32 @@
-// src/components/Common/MenuLayout.jsx
 import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import MenuIcon from '../../assets/images/HomeScreen/menu.svg';
 import { useNavigate } from 'react-router-dom';
 
+/**
+ * MenuLayout
+ * - 메뉴 버튼(모서리 4개) + 상/하/좌/우 텍스트 표시
+ * - 메뉴 오픈 시: 화면 전체 블러(단, 모든 메뉴버튼과 중앙 링크는 제외)
+ * - type === 'child' 인 경우:
+ *    - 데스크톱/태블릿: 좌/우 텍스트 노출, 상/하 텍스트 비노출
+ *    - 모바일(<600px): 상단바 모드(좌측/우측 버튼 + 제목 중앙), 좌/우 텍스트/하단 버튼 숨김
+ * - 모바일 child 상단바 배경: var(--bgcolor)
+ * - 제목 폰트는 메뉴 텍스트의 1.3배는 ContentsLayout에서 제공(여기선 모바일 child 상단바에서만 제목 렌더)
+ */
 export default function MenuLayout({ text = '', type = '' }) {
     const [open, setOpen] = useState(false);
     const [isVertical, setIsVertical] = useState(true);
-    const [isNarrow, setIsNarrow] = useState(false); // 폭 600px 미만
-    const [leftAdj, setLeftAdj] = useState(0);       // 왼쪽 세로텍스트 실측 보정
+    const [isNarrow, setIsNarrow] = useState(false); // <600px
+    const [leftAdj, setLeftAdj] = useState(0);       // 왼쪽 270deg 실측 보정
     const leftRef = useRef(null);
     const navigate = useNavigate();
+
+    // 치수 상수 (ContentsLayout과 공유되는 감각)
+    const cornerSize = 'clamp(24px, 6vw, 48px)'; // 모서리 버튼 크기
+    const edgeOffset = 'clamp(24px, 5vw, 70px)'; // 가장자리 여백
+    const topOffset  = `calc(env(safe-area-inset-top) + ${edgeOffset})`;
+    const bottomOffset = `calc(env(safe-area-inset-bottom) + ${edgeOffset})`;
+    const barH = 'clamp(56px, 12vw, 72px)';      // 모바일 child 상단바 높이
 
     useEffect(() => {
         const onResize = () => {
@@ -38,10 +54,9 @@ export default function MenuLayout({ text = '', type = '' }) {
         }
     };
 
-    // ===== 스타일 상수
     const baseTextStyle = {
         fontFamily: 'Pretendard-SemiBold',
-        fontSize: 'clamp(24px, 5vw, 38px)', // 모바일에서도 크게
+        fontSize: 'clamp(24px, 5vw, 38px)', // 메뉴 텍스트 기준(제목은 1.3배: ContentsLayout에서)
         color: 'var(--textcolor)',
         cursor: 'pointer',
         transition: 'color .3s, transform .3s',
@@ -49,34 +64,27 @@ export default function MenuLayout({ text = '', type = '' }) {
         userSelect: 'none',
     };
 
-    const cornerSize   = 'clamp(24px, 6vw, 48px)';  // 버튼 크기
-    const edgeOffset   = 'clamp(24px, 5vw, 70px)';  // 테두리로부터 거리
-    const topOffset    = `calc(env(safe-area-inset-top) + ${edgeOffset})`;
-    const bottomOffset = `calc(env(safe-area-inset-bottom) + ${edgeOffset})`;
+    // 중앙 링크와 버튼은 블러 제외, 그 외는 블러
+    const overlayStyle = {
+        position: 'fixed',
+        inset: 0,
+        zIndex: 1000,
+        pointerEvents: open ? 'auto' : 'none',
+        backdropFilter: open ? 'blur(12px)' : 'none',
+        WebkitBackdropFilter: open ? 'blur(12px)' : 'none',
+        backgroundColor: open ? 'rgba(255,255,255,0.08)' : 'transparent',
+        transition: 'backdrop-filter .35s, background-color .35s',
+    };
 
-    // 텍스트/상단바 블러(버튼은 블러 X)
-    const textSelfBlur = open ? 'blur(6px)' : 'none';
-    const textBlurTransition = 'filter .28s ease';
+    // 모바일 child 상단바 모드 여부
+    const isMobileChildBar = isNarrow && type === 'child';
 
-    // 상단바(모바일 child 전용)
-    const barH = 'clamp(56px, 12vw, 72px)';
-    const isMobileChild = isNarrow && type === 'child';
-
-    // 상단바 중앙선과 버튼/텍스트의 수평 중앙을 맞추는 공통 Y좌표
-    // topBaseline = safe-area-top + (barH - cornerSize)/2
-    const topBaseline = isMobileChild
-        ? `calc(env(safe-area-inset-top) + ( ${barH} - ${cornerSize} ) / 2)`
-        : topOffset;
-
-    // ===== 표시할 모서리 버튼 집합(모바일+child => 상단 2개만)
-    const cornerPositions =
-        isMobileChild
-            ? ['top-left', 'top-right']
-            : ['top-left', 'top-right', 'bottom-left', 'bottom-right'];
-
-    // ===== 모서리 버튼 렌더
+    // 버튼 공통 렌더러 (상단바 모드일 때는 top에 정렬)
     const renderCornerButton = (position) => {
-        if (!cornerPositions.includes(position)) return null;
+        // 모바일 child에서는 하단 버튼 숨김
+        if (isMobileChildBar && (position === 'bottom-left' || position === 'bottom-right')) {
+            return null;
+        }
 
         const st = {
             position: 'fixed',
@@ -85,20 +93,20 @@ export default function MenuLayout({ text = '', type = '' }) {
             cursor: 'pointer',
             transform: open ? 'rotate(0deg)' : 'rotate(45deg)',
             transition: 'transform .3s',
-            zIndex: 1006, // overlay 위(블러 영향 X)
+            zIndex: 1002, // 오버레이 위 (블러 제외)
             WebkitTapHighlightColor: 'transparent',
         };
 
-        // Y축: 모바일+child면 topBaseline, 아니면 기존 오프셋
-        if (position.startsWith('top')) {
-            st.top = topBaseline;
+        if (isMobileChildBar) {
+            // 상단바 모드: 수평 중앙선 정확히 맞춤
+            if (position === 'top-left')  { st.top = `calc(env(safe-area-inset-top) + (${barH} - ${cornerSize})/2)`; st.left = edgeOffset; }
+            if (position === 'top-right') { st.top = `calc(env(safe-area-inset-top) + (${barH} - ${cornerSize})/2)`; st.right = edgeOffset; }
+        } else {
+            if (position === 'top-left')     { st.top = topOffset; st.left = edgeOffset; }
+            if (position === 'top-right')    { st.top = topOffset; st.right = edgeOffset; }
+            if (position === 'bottom-left')  { st.bottom = bottomOffset; st.left = edgeOffset; }
+            if (position === 'bottom-right') { st.bottom = bottomOffset; st.right = edgeOffset; }
         }
-        if (position.startsWith('bottom')) {
-            st.bottom = bottomOffset;
-        }
-        // X축: 좌/우 고정 간격
-        if (position.endsWith('left'))  st.left  = edgeOffset;
-        if (position.endsWith('right')) st.right = edgeOffset;
 
         return (
             <img
@@ -111,190 +119,164 @@ export default function MenuLayout({ text = '', type = '' }) {
         );
     };
 
-    // ===== 오버레이(메뉴)
-    const overlay = (
+    // 중앙 링크 (HOME / PROFILE / ...)
+    const CentralMenu = () => (
         <div
             style={{
-                position: 'fixed',
-                inset: 0,
-                zIndex: 1000,
-                pointerEvents: open ? 'auto' : 'none',
-                backdropFilter: open ? 'blur(12px)' : 'none',
-                WebkitBackdropFilter: open ? 'blur(12px)' : 'none',
-                backgroundColor: open ? 'rgba(255,255,255,0.08)' : 'transparent',
-                transition: 'backdrop-filter .35s, background-color .35s',
+                position: 'absolute',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+                display: 'flex',
+                flexDirection: isVertical ? 'column' : 'row',
+                gap: isVertical ? '28px' : '64px',
+                alignItems: 'center',
+                zIndex: 1001, // 오버레이 위(블러 제외)
             }}
         >
-            {open && (
+            {[
+                { label: 'HOME',        go: () => navigate('/') },
+                { label: 'PROFILE',     go: () => navigate('/profile') },
+                { label: 'DISCOGRAPHY', go: () => navigate('/discography') },
+                { label: 'MUSIC VIDEO', go: () => navigate('/videos') },
+                { label: 'SIGN UP',     go: () => window.open('https://laylo.com/inalt_', '_blank') },
+            ].map(i => (
                 <div
-                    style={{
-                        position: 'absolute',
-                        top: '50%',
-                        left: '50%',
-                        transform: 'translate(-50%, -50%)',
-                        display: 'flex',
-                        flexDirection: isVertical ? 'column' : 'row',
-                        gap: isVertical ? '28px' : '64px',
-                        alignItems: 'center',
-                        zIndex: 1001,
+                    key={i.label}
+                    style={baseTextStyle}
+                    onClick={() => { i.go(); setOpen(false); }}
+                    onMouseEnter={(e) => {
+                        e.currentTarget.style.color = '#000';
+                        e.currentTarget.style.transform = 'scale(1.12)';
+                    }}
+                    onMouseLeave={(e) => {
+                        e.currentTarget.style.color = 'var(--textcolor)';
+                        e.currentTarget.style.transform = 'scale(1)';
                     }}
                 >
-                    {[
-                        { label: 'HOME',        go: () => navigate('/') },
-                        { label: 'PROFILE',     go: () => navigate('/profile') },
-                        { label: 'DISCOGRAPHY', go: () => navigate('/discography') },
-                        { label: 'MUSIC VIDEO', go: () => navigate('/videos') },
-                        { label: 'SIGN UP',     go: () => window.open('https://laylo.com/inalt_', '_blank') },
-                    ].map((i) => (
-                        <div
-                            key={i.label}
-                            style={baseTextStyle}
-                            onClick={() => { i.go(); setOpen(false); }}
-                            onMouseEnter={(e) => {
-                                e.currentTarget.style.color = '#000';
-                                e.currentTarget.style.transform = 'scale(1.12)';
-                            }}
-                            onMouseLeave={(e) => {
-                                e.currentTarget.style.color = 'var(--textcolor)';
-                                e.currentTarget.style.transform = 'scale(1)';
-                            }}
-                        >
-                            {i.label}
-                        </div>
-                    ))}
+                    {i.label}
                 </div>
-            )}
-
-            {/* ===== 상/하 텍스트 */}
-            {type !== 'child' && (
-                <>
-                    {/* TOP TEXT BAR: 버튼과 같은 Y(topBaseline), 동일 높이(cornerSize) */}
-                    <div
-                        style={{
-                            position: 'fixed',
-                            left: 0, right: 0,
-                            top: topBaseline,
-                            height: cornerSize,
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            pointerEvents: 'none',
-                            zIndex: 1000,
-                            filter: textSelfBlur,
-                            transition: textBlurTransition,
-                            willChange: 'filter',
-                        }}
-                    >
-                        <span style={baseTextStyle}>{text}</span>
-                    </div>
-
-                    {/* BOTTOM TEXT BAR(기존 유지) */}
-                    <div
-                        style={{
-                            position: 'fixed',
-                            left: 0, right: 0,
-                            bottom: bottomOffset,
-                            height: cornerSize,
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            pointerEvents: 'none',
-                            zIndex: 1000,
-                            filter: textSelfBlur,
-                            transition: textBlurTransition,
-                            willChange: 'filter',
-                        }}
-                    >
-                        <span style={baseTextStyle}>{text}</span>
-                    </div>
-                </>
-            )}
-
-            {/* 좌/우 텍스트 (좁은 화면에서는 숨김) */}
-            {!isNarrow && (
-                <>
-                    {/* 왼쪽 — 270° + 실측 보정 */}
-                    <div
-                        style={{
-                            position: 'fixed',
-                            top: '50%',
-                            left: `calc(${edgeOffset} + ${leftAdj}px)`,
-                            transform: 'translateY(-50%)',
-                            pointerEvents: 'none',
-                            zIndex: 1000,
-                            filter: textSelfBlur,
-                            transition: textBlurTransition,
-                            willChange: 'filter',
-                        }}
-                    >
-                        <div
-                            ref={leftRef}
-                            style={{
-                                transform: 'rotate(270deg)',
-                                transformOrigin: 'center center',
-                                ...baseTextStyle,
-                            }}
-                        >
-                            {text}
-                        </div>
-                    </div>
-
-                    {/* 오른쪽 — writing-mode로 x축 흔들림 제거 */}
-                    <div
-                        style={{
-                            position: 'fixed',
-                            top: '50%',
-                            right: edgeOffset,
-                            transform: 'translateY(-50%)',
-                            pointerEvents: 'none',
-                            zIndex: 1000,
-                            writingMode: 'vertical-rl',
-                            textOrientation: 'mixed',
-                            filter: textSelfBlur,
-                            transition: textBlurTransition,
-                            willChange: 'filter',
-                        }}
-                    >
-                        <span style={baseTextStyle}>{text}</span>
-                    </div>
-                </>
-            )}
+            ))}
         </div>
     );
 
-    // ===== 상단바 (모바일 + child일 때만) — 제목만, 버튼은 모서리 전역 버튼 사용
-    const headerBar = (isMobileChild) ? (
-        <div
-            style={{
-                position: 'fixed',
-                top: 0, left: 0, right: 0,
-                height: barH,
-                zIndex: 1003,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                backgroundColor: 'var(--bgcolor)',
-                pointerEvents: 'none',
-                filter: textSelfBlur,
-                transition: textBlurTransition,
-            }}
-        >
+    // 상/하 텍스트 (child가 아닐 때만)
+    const TopBottomTexts = () => {
+        if (type === 'child') return null;
+        const filterBlur = open ? 'blur(6px)' : 'none';
+        const textStyle = { ...baseTextStyle, pointerEvents: 'none', filter: filterBlur, transition: 'filter .28s ease' };
+        return (
+            <>
+                <div style={{ position: 'fixed', top: topOffset, left: '50%', transform: 'translateX(-50%)', zIndex: 999 }}>
+                    <span style={textStyle}>{text}</span>
+                </div>
+                <div style={{ position: 'fixed', bottom: bottomOffset, left: '50%', transform: 'translateX(-50%)', zIndex: 999 }}>
+                    <span style={textStyle}>{text}</span>
+                </div>
+            </>
+        );
+    };
+
+    // 좌/우 텍스트(모바일에서는 숨김)
+    const LeftRightTexts = () => {
+        if (isNarrow) return null;
+        const filterBlur = open ? 'blur(6px)' : 'none';
+        return (
+            <>
+                {/* 왼쪽 - 270deg 보정 */}
+                <div
+                    style={{
+                        position: 'fixed',
+                        top: '50%',
+                        left: `calc(${edgeOffset} + ${leftAdj}px)`,
+                        transform: 'translateY(-50%)',
+                        pointerEvents: 'none',
+                        zIndex: 999,
+                        filter: filterBlur,
+                        transition: 'filter .28s ease',
+                    }}
+                >
+                    <div
+                        ref={leftRef}
+                        style={{ transform: 'rotate(270deg)', transformOrigin: 'center center', ...baseTextStyle }}
+                    >
+                        {text}
+                    </div>
+                </div>
+
+                {/* 오른쪽 - writing-mode */}
+                <div
+                    style={{
+                        position: 'fixed',
+                        top: '50%',
+                        right: edgeOffset,
+                        transform: 'translateY(-50%)',
+                        pointerEvents: 'none',
+                        zIndex: 999,
+                        writingMode: 'vertical-rl',
+                        textOrientation: 'mixed',
+                        filter: filterBlur,
+                        transition: 'filter .28s ease',
+                    }}
+                >
+                    <span style={baseTextStyle}>{text}</span>
+                </div>
+            </>
+        );
+    };
+
+    // 모바일 child 상단바 (제목 + 좌/우 버튼 위치 기준선 통일)
+    const MobileChildTopBar = () => {
+        if (!isMobileChildBar) return null;
+        // 제목은 블러 대상(규칙 2), 버튼은 블러 제외
+        const titleBlur = open ? 'blur(6px)' : 'none';
+        return (
             <div
                 style={{
-                    ...baseTextStyle,
-                    fontSize: 'clamp(20px, 5.2vw, 34px)',
+                    position: 'fixed',
+                    top: 'env(safe-area-inset-top)',
+                    left: 0,
+                    right: 0,
+                    height: barH,
+                    backgroundColor: 'var(--bgcolor)',
+                    zIndex: 1000,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    pointerEvents: 'none',
                 }}
             >
-                {text}
+                <div
+                    style={{
+                        fontFamily: 'Pretendard-Bold',
+                        // 메뉴 텍스트(24~38의 clamp)의 1.3배 ≈ clamp(31px, 6.5vw, 49px) 정도
+                        fontSize: 'clamp(31px, 6.5vw, 49px)',
+                        color: 'var(--textcolor)',
+                        filter: titleBlur,
+                        transition: 'filter .28s ease',
+                    }}
+                >
+                    {text}
+                </div>
             </div>
+        );
+    };
+
+    const overlay = (
+        <div style={overlayStyle}>
+            {open && <CentralMenu />}
+            <TopBottomTexts />
+            <LeftRightTexts />
+            {/* 모바일 child 전용 상단바 */}
+            <MobileChildTopBar />
         </div>
-    ) : null;
+    );
 
     return createPortal(
         <>
-            {headerBar}
             {overlay}
-            {cornerPositions.map(renderCornerButton)}
+            {/* 모서리 버튼(오버레이 위, 항상 선명) */}
+            {['top-left', 'top-right', 'bottom-left', 'bottom-right'].map(renderCornerButton)}
         </>,
         document.body
     );

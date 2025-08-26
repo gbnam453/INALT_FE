@@ -1,4 +1,3 @@
-// src/components/DiscographyScreen/Album.jsx
 import React, { useState } from 'react';
 
 export default function Album({ title = '', detail = '', img, url = '#' }) {
@@ -16,14 +15,12 @@ export default function Album({ title = '', detail = '', img, url = '#' }) {
             }}
             style={{
                 position: 'relative',
-                width: '100%',              // ✅ 그리드 셀 너비 100% 채우기
-                aspectRatio: '1 / 1',       // ✅ 항상 정사각형 유지
+                width: '100%',              // 그리드 셀 폭에 맞춤
+                aspectRatio: '1 / 1',
                 overflow: 'hidden',
-                borderRadius: '10px',
+                borderRadius: '8px',
                 cursor: 'pointer',
-                boxShadow: hovered
-                    ? '0 6px 16px rgba(0,0,0,0.18)'
-                    : '0 2px 8px rgba(0,0,0,0.08)',
+                boxShadow: hovered ? '0 6px 16px rgba(0,0,0,0.18)' : '0 2px 8px rgba(0,0,0,0.08)',
                 transition: 'box-shadow .2s ease, transform .2s ease',
                 transform: hovered ? 'translateY(-2px)' : 'translateY(0)',
                 WebkitTapHighlightColor: 'transparent',
@@ -37,15 +34,13 @@ export default function Album({ title = '', detail = '', img, url = '#' }) {
                 style={{
                     width: '100%',
                     height: '100%',
-                    objectFit: 'cover',                 // ✅ 셀을 꽉 채우는 이미지
+                    objectFit: 'cover',
                     filter: hovered ? 'brightness(35%)' : 'none',
                     transition: 'filter .25s ease',
                     display: 'block',
                 }}
                 draggable={false}
             />
-
-            {/* Hover 텍스트 오버레이 */}
             <div
                 style={{
                     position: 'absolute',
@@ -54,7 +49,7 @@ export default function Album({ title = '', detail = '', img, url = '#' }) {
                     alignItems: 'center',
                     justifyContent: 'center',
                     textAlign: 'center',
-                    padding: '12px',
+                    padding: '10px',
                     color: '#fff',
                     opacity: hovered ? 1 : 0,
                     transition: 'opacity .25s ease',
@@ -65,20 +60,13 @@ export default function Album({ title = '', detail = '', img, url = '#' }) {
                         style={{
                             fontWeight: 700,
                             marginBottom: '6px',
-                            // 데스크톱에서 3열 기준 비디오 카드 스케일에 맞춰 조금 키움
-                            fontSize: 'clamp(13px, 2.1vw, 18px)',
+                            fontSize: 'clamp(12px, 2.4vw, 16px)',
                             lineHeight: 1.2,
                         }}
                     >
                         {title}
                     </div>
-                    <div
-                        style={{
-                            fontSize: 'clamp(11px, 1.8vw, 16px)',
-                            lineHeight: 1.35,
-                            opacity: 0.95,
-                        }}
-                    >
+                    <div style={{ fontSize: 'clamp(10px, 2vw, 14px)', lineHeight: 1.35 }}>
                         {detail}
                     </div>
                 </div>

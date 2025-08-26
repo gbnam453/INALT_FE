@@ -1,6 +1,10 @@
-/* src/styles/colors.css */
 :root {
     --bgcolor: #D1D1D1;
-    --textcolor: #000000;      /* 기본 텍스트 */
-    --bodytextcolor: #747474;  /* 본문 텍스트 */
+    --textcolor: #000000;
+    --bodytextcolor: #747474;
+
+    /* 콘텐츠 공통 레이아웃 변수 */
+    --content-max-width: 1200px;
+    --content-side-padding-desktop: 200px; /* ← 요청 반영: 200px */
+    --content-side-padding-mobile: 20px;   /* 모바일 축소 패딩 */
 }

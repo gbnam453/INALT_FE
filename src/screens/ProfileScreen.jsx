@@ -1,9 +1,10 @@
+// src/screens/ProfileScreen.jsx
 import React, { useEffect, useState, useMemo } from 'react';
 import MenuLayout from '../components/Common/MenuLayout';
 import ProfileImg from '../assets/images/Common/Profile.png';
 
 export default function ProfileScreen() {
-    const [isNarrow, setIsNarrow] = useState(false); // 900px 미만을 모바일/좁은 화면 기준
+    const [isNarrow, setIsNarrow] = useState(false); // 900px 미만
 
     // 바디 스크롤 잠금
     useEffect(() => {
@@ -20,21 +21,13 @@ export default function ProfileScreen() {
         return () => window.removeEventListener('resize', onResize);
     }, []);
 
-    // 섹션 간격(디스코 스타일과 동일)
+    // 컨텐츠 레이아웃과 동일한 정책으로 통일
+    const CONTENT_MAX_WIDTH = '1200px';
+    const SIDE_PADDING_DESKTOP = 200; // 좌우 200px (데스크톱)
+    const SIDE_PADDING_MOBILE  = 20;  // 좌우 20px (모바일)
+
     const SECTION_GAP = useMemo(() => (isNarrow ? 80 : 100), [isNarrow]);
-
-    // 디스코 스타일에서 쓰는 기준값들
-    const cornerSize = 'clamp(24px, 6vw, 48px)';   // 모서리 버튼 크기
-    const edgeOffset = 'clamp(24px, 5vw, 70px)';   // 상/하 여백 기준
-    const barH       = 'clamp(56px, 12vw, 72px)';  // 모바일 child 상단바 높이
-
-    // 제목 baseline: 상단 버튼과 같은 가로선(디스코와 동일 계산식)
-    const topBaseline = isNarrow
-        ? `calc(env(safe-area-inset-top) + ( ${barH} - ${cornerSize} ) / 2)`
-        : `calc(env(safe-area-inset-top) + ${edgeOffset} - ${cornerSize} + 10px)`;
-
-    // 제목 폰트(디스코와 동일)
-    const TITLE_FONT = 'clamp(34px, 6.5vw, 46px)';
+    const TITLE_FONT  = 'clamp(34px, 6.5vw, 46px)';
 
     return (
         <div
@@ -44,7 +37,7 @@ export default function ProfileScreen() {
                 width: '100vw',
                 height: '100vh',
                 backgroundColor: 'var(--bgcolor)',
-                overflowY: 'auto',                 // ✅ 제목 포함 전체 스크롤
+                overflowY: 'auto',                   // ✅ 제목 포함 전체 스크롤
                 display: 'flex',
                 justifyContent: 'center',
             }}
@@ -52,23 +45,24 @@ export default function ProfileScreen() {
             <div
                 style={{
                     width: '100%',
-                    maxWidth: '1200px',
+                    maxWidth: CONTENT_MAX_WIDTH,
                     boxSizing: 'border-box',
-                    padding: '0 20px 120px',        // ✅ 상단은 topBaseline으로, 하단 넉넉히
+                    // ✅ 좌우 여백을 200px(모바일 20px)로 통일
+                    padding: `30px ${isNarrow ? SIDE_PADDING_MOBILE : SIDE_PADDING_DESKTOP}px 120px`,
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
                     gap: `${SECTION_GAP}px`,
                 }}
             >
-                {/* 제목 — 디스코와 동일한 위치/스타일 */}
+                {/* 제목 — VideoScreen 과 동일 스타일/여백 */}
                 <div
                     style={{
-                        marginTop: topBaseline,                 // ✅ 상단 버튼 가로선과 정렬
                         fontFamily: 'Pretendard-Bold',
                         fontSize: TITLE_FONT,
                         color: 'var(--textcolor)',
                         textAlign: 'center',
+                        marginTop: '30px',
                         marginBottom: `${Math.max(SECTION_GAP, 60)}px`,
                     }}
                 >
@@ -88,7 +82,7 @@ export default function ProfileScreen() {
                     }}
                 />
 
-                {/* 본문 */}
+                {/* 본문 — 컨테이너 너비에 맞게 최대 100%로 확장 */}
                 <div
                     style={{
                         fontFamily: 'Pretendard-Regular',
@@ -97,7 +91,7 @@ export default function ProfileScreen() {
                         textAlign: 'center',
                         color: 'var(--bodytextcolor)',
                         whiteSpace: 'pre-wrap',
-                        maxWidth: 'min(700px, 90vw)',
+                        maxWidth: '100%',         // ✅ 좌우 200px 패딩 기준 내부 너비 전체 사용
                         marginBottom: '60px',
                     }}
                 >
