@@ -1,38 +1,35 @@
 // src/screens/ProfileScreen.jsx
-import React, { useEffect } from 'react';
+import React from 'react';
 import MenuLayout from '../components/Common/MenuLayout';
 import ProfileImg from '../assets/images/Common/Profile.png';
 
 export default function ProfileScreen() {
-    useEffect(() => {
-        const o = document.body.style.overflow;
-        document.body.style.overflow = 'hidden';
-        return () => { document.body.style.overflow = o; };
-    }, []);
-
     return (
         <div
             style={{
-                position: 'fixed',
+                position: 'relative',         // 메뉴와 스크롤 영역의 기준 컨테이너
                 inset: 0,
                 width: '100vw',
                 height: '100vh',
                 backgroundColor: 'var(--bgcolor)',
+                overflow: 'hidden',           // 화면 밖으로 넘치지 않도록만 처리
             }}
         >
-            {/* 가운데 스크롤 영역 (화면 전체 높이에서 내부 스크롤) */}
+            {/* 가운데 스크롤 영역 (MenuLayout과 분리, 항상 아래 zIndex) */}
             <div
                 style={{
-                    height: '100vh',
+                    position: 'relative',
+                    zIndex: 1,                  // ✅ 콘텐츠는 아래
+                    height: '100%',
                     overflowY: 'auto',
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
                     boxSizing: 'border-box',
-                    padding: '30px 20px 40px', // 상단 30, 좌우 20, 하단 40
+                    padding: '30px 20px 40px',  // 상단 30, 좌우 20, 하단 40
                 }}
             >
-                {/* 상단 제목 (상단에서 40px 여백) */}
+                {/* 상단 제목 */}
                 <div
                     style={{
                         fontFamily: 'Pretendard-Bold',
@@ -81,8 +78,11 @@ Although they have not officially debuted yet, the artist continues to evolve an
                 </div>
             </div>
 
-            {/* 메뉴 */}
-            <MenuLayout text="PROFILE" type="child" />
+            {/* MenuLayout는 항상 최상단 레이어 */}
+            <div style={{ position: 'fixed', inset: 0, zIndex: 5, pointerEvents: 'none' }}>
+                {/* MenuLayout 내부에서 열린 상태(open)일 때만 pointerEvents를 auto로 바꾸도록 이미 구현되어 있음 */}
+                <MenuLayout text="PROFILE" type="child" />
+            </div>
         </div>
     );
 }

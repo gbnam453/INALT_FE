@@ -1,3 +1,4 @@
+// src/screens/DiscographyScreen.jsx
 import React, { useEffect } from 'react';
 import MenuLayout from '../components/Common/MenuLayout';
 import Album from '../components/DiscographyScreen/Album';
@@ -24,7 +25,7 @@ export default function DiscographyScreen() {
                 width: '100vw',
                 height: '100vh',
                 backgroundColor: 'var(--bgcolor)',
-                overflowY: 'auto',            // ✅ 화면 전체 스크롤 가능
+                overflowY: 'auto',
             }}
         >
             {/* 상단 제목 */}
@@ -46,11 +47,10 @@ export default function DiscographyScreen() {
                 className="album-grid"
                 style={{
                     display: 'grid',
-                    gap: '20px',
-                    justifyContent: 'center',   // ✅ 가로 가운데 정렬
+                    gap: '24px',
                     width: '100%',
-                    maxWidth: '1000px',
-                    margin: '0 auto 60px',      // 중앙 배치 + 하단 여백
+                    maxWidth: '1100px',
+                    margin: '0 auto 80px',
                     padding: '0 20px',
                     boxSizing: 'border-box',
                 }}
@@ -63,20 +63,21 @@ export default function DiscographyScreen() {
             {/* 메뉴 */}
             <MenuLayout text="DISCOGRAPHY" type="child" />
 
-            {/* 반응형 스타일 */}
+            {/* 반응형 그리드 */}
             <style>
                 {`
-          .album-grid {
-            grid-template-columns: repeat(3, auto);
+          .album-grid { 
+            grid-template-columns: repeat(3, 1fr);   /* 셀 폭 균등 */
+            place-items: stretch center;             /* 셀 폭 맞추고 가운데 정렬 */
           }
           @media (max-width: 900px) {
             .album-grid {
-              grid-template-columns: repeat(2, auto);
+              grid-template-columns: repeat(2, 1fr);
             }
           }
           @media (max-width: 600px) {
             .album-grid {
-              grid-template-columns: repeat(1, auto);
+              grid-template-columns: repeat(2, 1fr);
             }
           }
         `}
