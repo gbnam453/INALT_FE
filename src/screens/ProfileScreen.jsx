@@ -4,7 +4,10 @@ import MenuLayout from '../components/Common/MenuLayout';
 import ProfileImg from '../assets/images/Common/Profile.png';
 
 export default function ProfileScreen() {
-    const [isNarrow, setIsNarrow] = useState(false); // 900px 미만
+    // MenuLayout과 동일한 상단바 표시 기준(600px 미만일 때 상단바 노출)
+    const TOPBAR_BREAKPOINT = 600;
+
+    const [isTopbarMode, setIsTopbarMode] = useState(false); // MenuLayout 상단바 활성 여부(= 모바일 + child)
 
     // 바디 스크롤 잠금
     useEffect(() => {
@@ -13,21 +16,23 @@ export default function ProfileScreen() {
         return () => { document.body.style.overflow = prev; };
     }, []);
 
-    // 반응형 분기
+    // 반응형 분기 (MenuLayout의 상단바 노출 조건과 동일하게 600px 기준)
     useEffect(() => {
-        const onResize = () => setIsNarrow(window.innerWidth < 900);
+        const onResize = () => setIsTopbarMode(window.innerWidth < TOPBAR_BREAKPOINT);
         onResize();
         window.addEventListener('resize', onResize);
         return () => window.removeEventListener('resize', onResize);
     }, []);
 
-    // 컨텐츠 레이아웃과 동일한 정책으로 통일
+    // 공통 레이아웃 상수
     const CONTENT_MAX_WIDTH = '1200px';
-    const SIDE_PADDING_DESKTOP = 200; // 좌우 200px (데스크톱)
-    const SIDE_PADDING_MOBILE  = 20;  // 좌우 20px (모바일)
-
-    const SECTION_GAP = useMemo(() => (isNarrow ? 80 : 100), [isNarrow]);
+    const SIDE_PADDING_DESKTOP = 200;  // 좌우 200px
+    const SIDE_PADDING_MOBILE  = 20;   // 좌우 20px
+    const SECTION_GAP = useMemo(() => (isTopbarMode ? 80 : 100), [isTopbarMode]);
     const TITLE_FONT  = 'clamp(34px, 6.5vw, 46px)';
+
+    // MenuLayout 상단바 높이(같은 식으로 사용) — CSS calc로 직접 적용
+    const TOPBAR_HEIGHT_CSS = 'clamp(56px, 12vw, 72px)';
 
     return (
         <div
@@ -47,27 +52,31 @@ export default function ProfileScreen() {
                     width: '100%',
                     maxWidth: CONTENT_MAX_WIDTH,
                     boxSizing: 'border-box',
-                    // ✅ 좌우 여백을 200px(모바일 20px)로 통일
-                    padding: `30px ${isNarrow ? SIDE_PADDING_MOBILE : SIDE_PADDING_DESKTOP}px 120px`,
+                    // ✅ MenuLayout이 상단바를 표시하는 시점부터만 상단바 높이만큼 여백 추가
+                    padding: `${
+                        isTopbarMode ? `calc(${TOPBAR_HEIGHT_CSS} + 20px)` : '30px'
+                    } ${isTopbarMode ? SIDE_PADDING_MOBILE : SIDE_PADDING_DESKTOP}px 120px`,
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
                     gap: `${SECTION_GAP}px`,
                 }}
             >
-                {/* 제목 — VideoScreen 과 동일 스타일/여백 */}
-                <div
-                    style={{
-                        fontFamily: 'Pretendard-Bold',
-                        fontSize: TITLE_FONT,
-                        color: 'var(--textcolor)',
-                        textAlign: 'center',
-                        marginTop: '30px',
-                        marginBottom: `${Math.max(SECTION_GAP, 60)}px`,
-                    }}
-                >
-                    PROFILE
-                </div>
+                {/* 제목 — MenuLayout 상단바 표시 시(모바일 child 모드)에는 숨김 */}
+                {!isTopbarMode && (
+                    <div
+                        style={{
+                            fontFamily: 'Pretendard-Bold',
+                            fontSize: TITLE_FONT,          // MenuLayout 텍스트 대비 1.3배
+                            color: 'var(--textcolor)',
+                            textAlign: 'center',
+                            marginTop: '30px',
+                            marginBottom: `${Math.max(SECTION_GAP, 60)}px`,
+                        }}
+                    >
+                        PROFILE
+                    </div>
+                )}
 
                 {/* 프로필 이미지 */}
                 <img
@@ -91,7 +100,7 @@ export default function ProfileScreen() {
                         textAlign: 'center',
                         color: 'var(--bodytextcolor)',
                         whiteSpace: 'pre-wrap',
-                        maxWidth: '100%',         // ✅ 좌우 200px 패딩 기준 내부 너비 전체 사용
+                        maxWidth: '100%',
                         marginBottom: '60px',
                     }}
                 >
@@ -104,7 +113,7 @@ Although they have not officially debuted yet, the artist continues to evolve an
                 </div>
             </div>
 
-            {/* 공용 메뉴 (오버레이) */}
+            {/* 공용 메뉴 (오버레이). 이 스크린은 child 모드로 사용 */}
             <MenuLayout text="PROFILE" type="child" />
         </div>
     );
