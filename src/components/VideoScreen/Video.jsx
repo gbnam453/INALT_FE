@@ -1,4 +1,3 @@
-// src/components/VideoScreen/Video.jsx
 import React, { useEffect, useState } from 'react';
 
 export default function Video({
@@ -6,7 +5,7 @@ export default function Video({
                                   title,
                                   content,
                                   date,
-                                  type = 'left', // 'left' | 'right'
+                                  type = 'left',
                               }) {
     const [isNarrow, setIsNarrow] = useState(false);
 
@@ -22,15 +21,12 @@ export default function Video({
     const SHADOW = '0 2px 6px rgba(0,0,0,.08), 0 10px 24px rgba(0,0,0,.06)';
     const WRAP_MAX_W = 'min(1100px, 92vw)';
 
-    // 겹침 정도 (좌우/상하)
     const overlapX = isNarrow ? 0 : 90;
     const overlapY = isNarrow ? 0 : 18;
 
-    // 좌우로 동일하게 반씩 이동
     const imgShiftX = overlapX / 2;
     const cardShiftX = -overlapX / 2;
 
-    // 넓은 화면일 때만 wrap 반전
     const wrapStyle = {
         width: WRAP_MAX_W,
         position: 'relative',
@@ -41,11 +37,17 @@ export default function Video({
         transform: isRight && !isNarrow ? 'scaleX(-1)' : 'none',
     };
 
-    // 텍스트 원복 (넓은 화면 + right일 때만 필요)
     const textFix = isRight && !isNarrow ? { transform: 'scaleX(-1)' } : {};
 
     return (
-        <div style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
+        <div
+            style={{
+                width: '100%',
+                display: 'flex',
+                justifyContent: 'center',
+                marginBottom: isNarrow ? '80px' : '100px'  // ✅ 여기서 간격 조절
+            }}
+        >
             <div style={wrapStyle}>
                 {/* 이미지 */}
                 <div
@@ -59,7 +61,7 @@ export default function Video({
                         boxShadow: SHADOW,
                         zIndex: 1,
                         transform: isNarrow
-                            ? 'none' // 모바일: 반전 제거
+                            ? 'none'
                             : `translate(${imgShiftX}px, ${-overlapY}px)`,
                     }}
                 >
@@ -71,11 +73,7 @@ export default function Video({
                             height: '100%',
                             objectFit: 'cover',
                             display: 'block',
-                            transform: isNarrow
-                                ? 'none' // 모바일: 반전 제거
-                                : isRight
-                                    ? 'scaleX(-1)'
-                                    : 'none',
+                            transform: !isNarrow && isRight ? 'scaleX(-1)' : 'none',
                         }}
                     />
                 </div>
@@ -107,7 +105,7 @@ export default function Video({
                             flexDirection: 'column',
                             justifyContent: 'flex-start',
                             overflow: 'auto',
-                            ...textFix, // 넓은 화면에서 right일 때만 적용
+                            ...textFix,
                         }}
                     >
                         <div
